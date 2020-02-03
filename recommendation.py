@@ -55,6 +55,16 @@ def Convert_news_to_vectors(id_text_dict, term_id_tfidf):
 def find_most_similar_doc(converted_vectors):
     distance_matrix = pairwise_distances(converted_vectors, metric="cosine")
     similar_doc = {}
-    
+    distance_matrix = np.argsort(distance_matrix)
+    simililar_doc = {}
+    for id,row in enumerate(distance_matrix):
+        similar_doc[id+1] = row
+
+    return similar_doc
+
+
+
+
+
 
 

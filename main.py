@@ -19,6 +19,7 @@ def main():
     results = indexing(id_text_dict)
     term_id_tfidf = Dcit_Term_ID_Tfidf(id_text_dict, results)  # construct inverted matrix. term:id:tfidf
     vectors = Convert_news_to_vectors(id_text_dict, term_id_tfidf)
+    similar_doc = find_most_similar_doc(vectors)
     for term in term_id_tfidf.keys():
         print("term: {}, ID: (TF, DF, TFIDF): {}\n".format(term,term_id_tfidf[term]))
     for key, val in results.items():
