@@ -12,9 +12,9 @@ def Convert_news_to_vectors(id_text_dict, term_id_tfidf):
 
     vectors = {}
     vectors1 = {}
-
+    ID_list = []
     for key, value in id_text_dict.items():
-
+        ID_list.append(key)
         value = set(value)
         temp_dict = {}
         for term in value:
@@ -50,15 +50,15 @@ def Convert_news_to_vectors(id_text_dict, term_id_tfidf):
                 vector[d] = value1
         converted_vectors.append(vector)
 
-    return converted_vectors
+    return converted_vectors,ID_list
 
-def find_most_similar_doc(converted_vectors):
+def find_most_similar_doc(converted_vectors, id_list):
     distance_matrix = pairwise_distances(converted_vectors, metric="cosine")
     similar_doc = {}
     distance_matrix = np.argsort(distance_matrix)
     simililar_doc = {}
-    for id,row in enumerate(distance_matrix):
-        similar_doc[id+1] = row
+    for id,row in zip(id_list, distance_matrix):
+        similar_doc[id] = np.array(row[1:6]) + 1
 
     return similar_doc
 

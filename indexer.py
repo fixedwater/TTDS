@@ -85,7 +85,7 @@ class PreprocessModule(object):
         if file_path is None:
             raise ValueError
         self.file_path = file_path
-        self.attri_list = ['DATE', 'TITLE', 'TEXT']
+        self.attri_list = ['TITLE', 'AUTHER', 'DATE', 'TOPIC', 'TEXT', 'URL']
 
     def xml_parser(self):
         """
