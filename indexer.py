@@ -30,6 +30,7 @@ def xml_parser(file_path, attri_list):
         id = doc.find('ID').text
         title = ''
         main_text = ''
+        date = None
         # attri_val_dict = {attribution: value}
         attri_val_dict = dict()
 
@@ -41,19 +42,22 @@ def xml_parser(file_path, attri_list):
                 title = text_process(val)
             elif attr == 'TEXT':
                 main_text = text_process(val)
+            elif attr == 'DATE':
+                date = val
 
         text = title + main_text
         id_text_dict[id] = text
         complete_id_attris_dict[id] = attri_val_dict
+        id_time_dict[id] = date
 
-    return complete_id_attris_dict, id_text_dict
+    return complete_id_attris_dict, id_text_dict, id_time_dict
 
 
 def text_process(text):
     """
     mainly do tokenisation, stopping and stemming to title and text
-    :param text:
-    :return: processed_text
+    :param text: <string>
+    :return: processed_text: <list>
     """
     # remove symbols
     pure = re.sub(r'[^A-Za-z0-9]+', ' ', text)
