@@ -4,6 +4,11 @@ from autocorrect import spell
 from indexer import text_process
 import re
 from collections import defaultdict
+import requests
+import json
+from nltk.stem import WordNetLemmatizer
+from stemming.porter2 import stem
+from nltk.corpus import stopwords
 
 
 class SearchModule(object):
@@ -26,10 +31,8 @@ class SearchModule(object):
         :return: search_result_list: a list of ranked ids [id1, id2, ...]
         """
         corrected_query = spell(self.search_query)
-        # todo: stem ???
-        # ori_word_set = set(corrected_query.lower())
 
-        word_set = set(text_process(corrected_query))
+        word_set = set(text_process(corrected_query, stem_flag=1))
 
         if word_set:
             # a ranked search result list from most relevant to least
@@ -39,40 +42,59 @@ class SearchModule(object):
             same_id_set = self.get_same_id_set(word_set)
             if same_id_set:
                 # {id: final_score}
-                id_final_score_dict = self.get_final_score(same_id_set, word_set)
+                exact_id_final_score_dict = self.get_final_score(same_id_set, word_set)
                 # [(id, final_score)]   sorted by final_score from high to low, append id to search result list
-                sorted_id_list = sorted(id_final_score_dict.items(), key=lambda d: d[1], reverse=True)
-                for id, score in sorted_id_list:
+                exact_sorted_id_list = sorted(exact_id_final_score_dict.items(), key=lambda d: d[1], reverse=True)
+                for id, score in exact_sorted_id_list:
                     if id not in search_result_list:
                         search_result_list.append(id)
 
             #  then do synonym search
-            comb_list = find_synonyms_search_comb(word_set)
-            id_score_sum_dict = defaultdict(float)
-            for comb in comb_list:
-                comb = set(comb)
-                same_id_set = self.get_same_id_set(comb)
-                if same_id_set:
-                    id_final_score_dict = self.get_final_score(same_id_set, comb)
-                    for id, score in id_final_score_dict:
-                        id_score_sum_dict[id] += score
-            sorted_id_list = sorted(id_score_sum_dict.items(), key=lambda d: d[1], reverse=True)
-            for id, score in sorted_id_list:
-                if id not in search_result_list:
-                    search_result_list.append(id)
+            # lemma_set is eliminating redundant prefix or suffix of a word and extracting the base word
+            no_stemming_word_set = set(text_process(corrected_query, stem_flag=0))
+            lemma_list = list()
+            for word in no_stemming_word_set:
+                lemma_list.append(WordNetLemmatizer().lemmatize(word))
+            lemma_set = set(lemma_list)
 
-            # if No. results is still less than 100, do single word search
-            if len(search_result_list) < 100:
-                id_shit_dict = defaultdict()
-                for word in word_set:
-                    same_id_set = self.get_same_id_set({word})
-                    id_shit_dict += self.get_final_score(same_id_set, {word})
-                sorted_id_list = sorted(id_shit_dict.items(), key=lambda d: d[1], reverse=True)
-                for id, score in sorted_id_list:
+            # comb_list = find_synonyms_search_comb_by_wordnet(ori_word_set)
+            comb_list = find_synonyms_search_comb_by_wordapi(lemma_set)
+
+            if comb_list:
+                id_score_max_dict = defaultdict(float)
+                for comb in comb_list:
+                    processed_comb = []
+                    for word in comb:
+                        # word can be 'book of account' with space and stop words
+                        processed_comb += text_process(word, stem_flag=1)
+                    processed_comb = set(processed_comb)
+
+                    if processed_comb:
+                        same_id_set = self.get_same_id_set(processed_comb)
+                        if same_id_set:
+                            synonym_id_final_score_dict = self.get_final_score(same_id_set, processed_comb)
+                            for id, score in synonym_id_final_score_dict.items():
+                                id_score_max_dict[id] = max(score, id_score_max_dict[id])
+                synonym_sorted_id_list = sorted(id_score_max_dict.items(), key=lambda d: d[1], reverse=True)
+                for id, score in synonym_sorted_id_list:
                     if id not in search_result_list:
                         search_result_list.append(id)
 
-            return search_result_list
+            # if No. results is still less than 100, do single word search
+            if len(search_result_list) < 100:
+                single_id_score_sum_dict = defaultdict(float)
+                for word in word_set:
+                    same_id_set = self.get_same_id_set({word})
+                    if same_id_set:
+                        single_id_final_score_dict = self.get_final_score(same_id_set, {word})
+                        for id, score in single_id_final_score_dict.items():
+                            single_id_score_sum_dict[id] += score
+                single_sorted_id_list = sorted(single_id_score_sum_dict.items(), key=lambda d: d[1], reverse=True)
+                for id, score in single_sorted_id_list:
+                    if id not in search_result_list:
+                        search_result_list.append(id)
+
+            return search_result_list, len(search_result_list)
         else:
             print('Search query is too simple!')
             return []
@@ -83,27 +105,23 @@ class SearchModule(object):
         :param word_set: {word}
         :return: same_id_set: {doc_id}
         """
-        same_id_set = set()
         word_list = list(word_set)
 
-        i = 0
+        # try to find the first word's id set
+        try:
+            word = word_list[0]
+            same_id_set = set(self.indexed_dict[word].keys())
+        except KeyError:
+            return set()
 
-        # try to find a non-empty initial same_id_set
-        while not same_id_set:
-            try:
-                same_id_set = set(self.indexed_dict[word_list[i]].keys())
-            except Exception as error:
-                if error == KeyError:
-                    i += 1
-                elif error == IndexError:
-                    return set()
         # then to find intersection set
-        for word in word_list[i + 1:]:
-            try:
-                doc_id = set(self.indexed_dict[word].keys())
-                same_id_set = same_id_set & doc_id
-            except KeyError:
-                i += 1
+        if len(word_list) > 1:
+            for word in word_list[1:]:
+                try:
+                    doc_id = set(self.indexed_dict[word].keys())
+                    same_id_set = same_id_set & doc_id
+                except KeyError:
+                    return set()
         return same_id_set
 
     def get_final_score(self, same_id_set, word_set):
@@ -134,7 +152,7 @@ class SearchModule(object):
             for word in word_set:
                 pos_list += self.indexed_dict[word][doc_id]
             length = get_longest_streak(pos_list)
-            id_lenfac_dict[doc_id] = 1 + 0.1 * length
+            id_lenfac_dict[doc_id] = 1 + 0.2 * length
         return id_lenfac_dict
 
     def get_time_factor(self, same_id_set):
@@ -147,23 +165,24 @@ class SearchModule(object):
         for doc_id in same_id_set:
             id_time_dict[doc_id] = int(re.sub('-', '', self.id_time_dict[doc_id]))  # 2020-02-02 -> 20200202
 
-        time_list = sorted(id_time_dict.values(), reverse=True)
-        date_rank = {}
-        i = 1
-        m = len(time_list)
-        date_rank[time_list[0]] = 0
-        cnt = 0
-        id_timefac_dict = {}  # {id:rank}
-        while i < m - 1:
-            if time_list[i] < time_list[i - 1]:
-                cnt += 1
-                date_rank[time_list[i]] = cnt
-            else:
-                date_rank[time_list[i]] = cnt
-            i += 1
+        sorted_time_list = sorted(id_time_dict.items(), key=lambda d: d[1], reverse=True)
+        id_rank_dict = dict()
+        id_rank_dict[sorted_time_list[0][0]] = 0
+        id_timefac_dict = dict()
+        if len(sorted_time_list) > 1:
+            prev_time = sorted_time_list[0][1]
+            rank = 0
+            for id, time in sorted_time_list[1:]:
+                if time == prev_time:
+                    id_rank_dict[id] = rank
+                else:
+                    rank += 1
+                    id_rank_dict[id] = rank
+                    prev_time = time
+
         for id in id_time_dict.keys():
             # {id: 1/(0.2*rank+1)}
-            id_timefac_dict[id] = 1 / (0.1 * date_rank[id_time_dict[id]] + 1)
+            id_timefac_dict[id] = 1 / (0.05 * id_rank_dict[id] + 1)
         return id_timefac_dict
 
     def get_rankalgo_factor(self, same_id_set, word_set, mode):
@@ -184,7 +203,7 @@ class SearchModule(object):
         return id_rankalgofac_dict
 
 
-def find_synonyms_search_comb(word_set):
+def find_synonyms_search_comb_by_wordnet(word_set):
     """
     :param word_set: target
     :return: comb_list: <list>
@@ -194,12 +213,33 @@ def find_synonyms_search_comb(word_set):
         synonyms_list = []
         wsets = wordnet.synsets(word)
         synonyms_list += chain.from_iterable([i.lemma_names() for i in wsets])
-        sub = set(word_set) - {word}
+        sub = word_set - {word}
         for synonym in synonyms_list:
             synonym_comb_list.append(list(sub) + [synonym])
 
     # todo: remove repeated and redundant combs like XXX_oriWord_XXX, add max number limitation
     # todo: text_process the combs
+
+    return synonym_comb_list
+
+
+def find_synonyms_search_comb_by_wordapi(lemma_set):
+    headers = {
+        'x-rapidapi-host': "wordsapiv1.p.rapidapi.com",
+        'x-rapidapi-key': "c6651e24acmshb5fbe2ee3dedd19p19caf3jsnce7a1283de3e"
+    }
+
+    synonym_comb_list = list()
+    for word in lemma_set:
+        synonyms_list = []
+        url = "https://wordsapiv1.p.mashape.com/words/{}/synonyms".format(word)
+        response = requests.request("GET", url, headers=headers).text
+        content = json.loads(response)
+        synonyms_list = content.get('synonyms')
+        if synonyms_list is not None:
+            sub = lemma_set - {word}
+            for synonym in synonyms_list:
+                synonym_comb_list.append(list(sub) + [synonym])
 
     return synonym_comb_list
 

@@ -34,8 +34,9 @@ def main():
     # step 1: parse xml
     # complete_id_attris_dict = {ID:{attri:val}}, id_text_dict = {ID: [title + text]}
     complete_id_attris_dict, id_text_dict, id_time_dict = xml_parser(file_path=file_path,
-                                                       attri_list=['TITLE', 'AUTHER', 'DATE', 'TOPIC', 'TEXT', 'URL'])
+                                                       attri_list=['TITLE', 'AUTHER', 'DATE', 'TOPIC', 'IMAGE', 'TEXT', 'URL'])
 
+    # todo: shorten ID!
     # todo: step2: store complete_id_attris_dict into database and release memory
 
     # step 3: indexing
@@ -54,19 +55,22 @@ def main():
     print(similar_doc)
 
     # step 6: search model
+    # todo: interface of getting search query here
+    search_query = 'National Committee'
 
-    search_query = 'Chinese food'
     search_instance = SearchModule(indexed_dict, term_id_tfidf_bm25_dict, id_time_dict)
     search_instance.get_search_query(search_query)
 
     # glove_model = load_glove()
     # search_instance.get_glove_model(glove_model)
 
-    result = search_instance.conduct_search()
+    result, len = search_instance.conduct_search()
+    print('search result: ' + str(result) + '    number of news found: ' + str(len))
 
+    # todo: get similar combs and show
 
 def test():
-    res = find_synonyms_search_comb({'best', 'movie'})
+    res = find_synonyms_search_comb({'museums', 'library'})
     print(res)
     # glove_model = load_glove()
     # res = find_similar_search_comb({'chinese', 'food'}, glove_model)
@@ -75,7 +79,7 @@ def test():
 
 if __name__ == '__main__':
     # package_install()
-    # main()
-    test()
+    main()
+    # test()
 
 
