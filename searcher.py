@@ -11,9 +11,6 @@ class SearchModule(object):
         self.indexed_dict = indexed_dict
         self.term_id_tfidf_bm25_dict = term_id_tfidf_bm25_dict
         self.id_time_dict = id_time_dict
-        if indexed_dict or term_id_tfidf_bm25_dict or id_time_dict is None:
-            raise ValueError
-
         self.search_query = None
         self.glove_model = None
 
@@ -29,16 +26,18 @@ class SearchModule(object):
         :return: search_result_list: a list of ranked ids [id1, id2, ...]
         """
         corrected_query = spell(self.search_query)
+        # todo: stem ???
+        # ori_word_set = set(corrected_query.lower())
 
         word_set = set(text_process(corrected_query))
 
-        if word_set is not {}:
+        if word_set:
             # a ranked search result list from most relevant to least
             search_result_list = list()
 
             # start to do exact search
             same_id_set = self.get_same_id_set(word_set)
-            if same_id_set is not {}:
+            if same_id_set:
                 # {id: final_score}
                 id_final_score_dict = self.get_final_score(same_id_set, word_set)
                 # [(id, final_score)]   sorted by final_score from high to low, append id to search result list
@@ -47,21 +46,20 @@ class SearchModule(object):
                     if id not in search_result_list:
                         search_result_list.append(id)
 
-            # if No. results is still less than 100, do synonym search
-            if len(search_result_list) < 100:
-                comb_list = find_synonyms_search_comb(word_set)
-                id_score_sum_dict = defaultdict(float)
-                for comb in comb_list:
-                    comb = set(comb)
-                    same_id_set = self.get_same_id_set(comb)
-                    if same_id_set is not {}:
-                        id_final_score_dict = self.get_final_score(same_id_set, comb)
-                        for id, score in id_final_score_dict:
-                            id_score_sum_dict[id] += score
-                sorted_id_list = sorted(id_score_sum_dict.items(), key=lambda d: d[1], reverse=True)
-                for id, score in sorted_id_list:
-                    if id not in search_result_list:
-                        search_result_list.append(id)
+            #  then do synonym search
+            comb_list = find_synonyms_search_comb(word_set)
+            id_score_sum_dict = defaultdict(float)
+            for comb in comb_list:
+                comb = set(comb)
+                same_id_set = self.get_same_id_set(comb)
+                if same_id_set:
+                    id_final_score_dict = self.get_final_score(same_id_set, comb)
+                    for id, score in id_final_score_dict:
+                        id_score_sum_dict[id] += score
+            sorted_id_list = sorted(id_score_sum_dict.items(), key=lambda d: d[1], reverse=True)
+            for id, score in sorted_id_list:
+                if id not in search_result_list:
+                    search_result_list.append(id)
 
             # if No. results is still less than 100, do single word search
             if len(search_result_list) < 100:
@@ -85,15 +83,27 @@ class SearchModule(object):
         :param word_set: {word}
         :return: same_id_set: {doc_id}
         """
-        same_id_set = {}
-        try:
-            same_id_set = set(self.indexed_dict[word_set[0]].keys())
-            if len(word_set) > 1:
-                for word in word_set[1:]:
-                    doc_id = set(self.indexed_dict[word].keys())
-                    same_id_set = same_id_set & doc_id
-        except KeyError:
-            pass
+        same_id_set = set()
+        word_list = list(word_set)
+
+        i = 0
+
+        # try to find a non-empty initial same_id_set
+        while not same_id_set:
+            try:
+                same_id_set = set(self.indexed_dict[word_list[i]].keys())
+            except Exception as error:
+                if error == KeyError:
+                    i += 1
+                elif error == IndexError:
+                    return set()
+        # then to find intersection set
+        for word in word_list[i + 1:]:
+            try:
+                doc_id = set(self.indexed_dict[word].keys())
+                same_id_set = same_id_set & doc_id
+            except KeyError:
+                i += 1
         return same_id_set
 
     def get_final_score(self, same_id_set, word_set):
@@ -188,7 +198,8 @@ def find_synonyms_search_comb(word_set):
         for synonym in synonyms_list:
             synonym_comb_list.append(list(sub) + [synonym])
 
-    # todo: remove repeated, add max number limitation
+    # todo: remove repeated and redundant combs like XXX_oriWord_XXX, add max number limitation
+    # todo: text_process the combs
 
     return synonym_comb_list
 
