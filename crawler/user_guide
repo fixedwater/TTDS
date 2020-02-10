@@ -1,0 +1,29 @@
+# news-crawler
+
+A news crawler for BBC News, Reuters, New York Times, Allantic News and TheGurdian News.
+
+## Requirements
+
+- python3
+- configobj
+- dateutil
+- requests
+- bs4
+- goose3
+
+
+## Architecture
+
+- xxx_crawler: the executive file to crawl news.
+- xxx.cfg: configurations for the crawler, including api, time range and storage path etc.
+- xxx_link.py: fetch download links.
+- xxx_article: extract content and some meta data of one news article.
+
+## Usage
+
+### <YourSelection> News
+
+```bash
+python <YourSelection>_crawler.py settings <YourSelection>.cfg
+```
+
