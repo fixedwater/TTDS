@@ -24,7 +24,8 @@ def xml_parser(file_path, attri_list):
 
     # {ID: text}
     id_text_dict = dict()
-
+    # {ID: time(date)}
+    id_time_dict = dict()
     for doc in root.findall('DOC'):
 
         id = doc.find('ID').text
@@ -39,9 +40,9 @@ def xml_parser(file_path, attri_list):
             attri_val_dict[attr] = val
 
             if attr == 'TITLE':
-                title = text_process(val)
+                title = text_process(val, stem_flag=1)
             elif attr == 'TEXT':
-                main_text = text_process(val)
+                main_text = text_process(val, stem_flag=1)
             elif attr == 'DATE':
                 date = val
 
@@ -53,14 +54,14 @@ def xml_parser(file_path, attri_list):
     return complete_id_attris_dict, id_text_dict, id_time_dict
 
 
-def text_process(text):
+def text_process(text, stem_flag):
     """
     mainly do tokenisation, stopping and stemming to title and text
     :param text: <string>
     :return: processed_text: <list>
     """
     # remove symbols
-    pure = re.sub(r'[^A-Za-z0-9]+', ' ', text)
+    pure = re.sub(r'[^A-Za-z]+', ' ', text)
     # case-folding
     case_folded_text = pure.lower()
     # tokenisation
@@ -69,9 +70,11 @@ def text_process(text):
     stop_words = set(stopwords.words('english'))
     filtered_text = [word for word in word_tokens if word not in stop_words]
     # stemming
-    processed_text = [stem(word) for word in filtered_text]
-
-    return processed_text
+    if stem_flag:
+        processed_text = [stem(word) for word in filtered_text]
+        return processed_text
+    else:
+        return filtered_text
 
 
 def indexing(id_text_dict):
