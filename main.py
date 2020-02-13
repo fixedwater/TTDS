@@ -42,8 +42,9 @@ def get_classifier():
                     [1, 2, 3, 4, 5, 6, 7]):
         file_path = 'D:\\ttds-cw3\\catagery-bbc\\AAA\\Articles.xml'
         file_path = re.sub("AAA", i, file_path)
-        preprocess_module = PreprocessModule(file_path=file_path)
-        complete_id_attris_dict, id_text_dict = preprocess_module.xml_parser()
+        complete_id_attris_dict, id_text_dict, id_time_dict = xml_parser(file_path=file_path,
+                                                                         attri_list=['TITLE', 'AUTHER', 'DATE', 'TOPIC',
+                                                                                     'IMAGE', 'TEXT', 'URL'])
         corpuse, lable = get_data(id_text_dict, j)
         corpuses += corpuse
         label_LIST += lable
