@@ -1,5 +1,7 @@
 import numpy as np
 from sklearn.metrics.pairwise import pairwise_distances
+
+
 def Convert_news_to_vectors(id_text_dict, term_id_tfidf):
     '''
 
@@ -66,10 +68,3 @@ def find_most_similar_doc(converted_vectors, id_list):
         similar_doc[id] = similar_doc_id
 
     return similar_doc
-
-
-
-
-
-
-
