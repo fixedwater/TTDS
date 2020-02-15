@@ -97,7 +97,7 @@ class SearchModule(object):
             return search_result_list, len(search_result_list)
         else:
             print('Search query is too simple!')
-            return []
+            return [], 0
 
     def get_same_id_set(self, word_set):
         """
@@ -152,7 +152,8 @@ class SearchModule(object):
             for word in word_set:
                 pos_list += self.indexed_dict[word][doc_id]
             length = get_longest_streak(pos_list)
-            id_lenfac_dict[doc_id] = 1 + 0.2 * length
+            # get bonus weight if length > 1
+            id_lenfac_dict[doc_id] = 1 + 0.2 * (length - 1)
         return id_lenfac_dict
 
     def get_time_factor(self, same_id_set):
