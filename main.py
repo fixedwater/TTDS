@@ -26,7 +26,7 @@ def write_in_txt(file, result, id_list):
 
 
 # file_path = 'D:\\ttds-cw3\Articles.xml'
-from recommender import Convert_news_to_vectors, find_most_similar_doc
+from recommender import recommend, find_most_similar_doc
 
 file_path = 'D:\\ttds-cw3\\dataset_classifier\\health_390.xml'
 
