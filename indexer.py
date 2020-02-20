@@ -1,3 +1,4 @@
+import os
 import xml.etree.ElementTree as ET
 import re
 from stemming.porter2 import stem
@@ -6,7 +7,8 @@ import copy
 import numpy as np
 
 
-def xml_parser(file_path, attri_list):
+
+def xml_parser1(file_path, attri_list):
     """
     parse xml file
     store the complete information about docs
@@ -45,7 +47,10 @@ def xml_parser(file_path, attri_list):
                 main_text = text_process(val, stem_flag=1)
             elif attr == 'DATE':
                 date = val
-
+        abstract = attri_val_dict['TEXT'][:200]
+        abstract = abstract.split(" ")[:-1]
+        abstract = " ".join(abstract)
+        attri_val_dict['abstract'] = abstract
         text = title + main_text
         id_text_dict[id] = text
         complete_id_attris_dict[id] = attri_val_dict
@@ -53,6 +58,88 @@ def xml_parser(file_path, attri_list):
 
     return complete_id_attris_dict, id_text_dict, id_time_dict
 
+def baseN(num, b):
+  return ((num == 0) and "0") or \
+      (baseN(num // b, b).lstrip("0") + "0123456789abcdefghijklmnopqrstuvwxyz"[num % b])
+
+def xml_parser(file_path, attri_list,id_start):
+    """
+    parse xml file
+    store the complete information about docs
+    call function to do tokenisation, stopping and stemming to title and text
+    :param file_path:
+    :param attri_list:
+    :return: complete_id_attris_dict = {id: {attri:val}}, id_text_dict = {id:[text]}
+    """
+
+    tree = ET.parse(file_path)
+    root = tree.getroot()
+    id_flag = id_start
+    # complete_id_attris_dict = {ID: attri_val_dict}
+    complete_id_attris_dict = dict()
+
+    # {ID: text}
+    id_text_dict = dict()
+    # {ID: time(date)}
+    id_time_dict = dict()
+    for doc in root.findall('DOC'):
+        try:
+            id = str(baseN(id_flag, 32))
+
+            title = ''
+            main_text = ''
+            date = None
+        # attri_val_dict = {attribution: value}
+            attri_val_dict = dict()
+
+            for attr in attri_list:
+                val = doc.find(attr).text
+                attri_val_dict[attr] = val
+
+                if attr == 'TITLE':
+                    title = text_process(val, stem_flag=1)
+                elif attr == 'TEXT':
+                    main_text = text_process(val, stem_flag=1)
+                elif attr == 'DATE':
+                    date = val
+            id_flag += 1
+            text = title + main_text
+            id_text_dict[id] = text
+            complete_id_attris_dict[id] = attri_val_dict
+            id_time_dict[id] = date
+        except:
+            print("find an wrong new")
+
+
+    return complete_id_attris_dict, id_text_dict, id_time_dict, id_flag
+
+def read_dataset(dataset_path):
+    files_list = []
+    for root, dirs, files in os.walk(dataset_path): #example: 'D:\\ttds-cw3\\dataset'
+        for filespath in files:
+            files_list.append(os.path.join(root, filespath))
+
+    print("read done")
+    complete_id_attris_dict = {}
+    id_text_dict = {}
+    id_time_dict = {}
+    id_flag = 0
+    for path in files_list:
+        complete_id_attris_dict_step, id_text_dict_step, id_time_dict_step, id_flag_step = xml_parser(file_path=path,
+                                                                                                      attri_list=[
+                                                                                                          'TITLE',
+                                                                                                          'AUTHER',
+                                                                                                          'DATE',
+                                                                                                          'TOPIC',
+                                                                                                          'IMAGE',
+                                                                                                          'TEXT',
+                                                                                                          'URL'],
+                                                                                                      id_start=id_flag)
+        id_flag = id_flag_step
+        complete_id_attris_dict.update(complete_id_attris_dict_step)
+        id_text_dict.update(id_text_dict_step)
+        id_time_dict.update(id_time_dict_step)
+    return complete_id_attris_dict, id_text_dict, id_time_dict, id_flag
 
 def text_process(text, stem_flag):
     """
@@ -120,7 +207,6 @@ def indexing(id_text_dict):
 
 def form_term_id_tfidf_bm25(id_text_dict, indexed_dict):
     '''
-
     :param id_text_dict: dictionary: {id:[text]}
     :param indexed_dict: dictionary: {term:{id:pos}}
     :return: dictionary: {term: {id: (tfidf, bm25) }}
