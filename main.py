@@ -1,14 +1,35 @@
 import os
-from gensim.test.utils import datapath, get_tmpfile
-from gensim.models import KeyedVectors
-from gensim.scripts.glove2word2vec import glove2word2vec
+#from gensim.test.utils import datapath, get_tmpfile
+#from gensim.models import KeyedVectors
+#from gensim.scripts.glove2word2vec import glove2word2vec
 from indexer import *
 from recommender import *
-from searcher import *
+#from searcher import *
 from classification import *
+from pickle import *
+import numpy as np
+import pickle
+
+def save_obj(obj, path):
+    with open(path, 'wb') as f:
+        pickle.dump(obj, f, pickle.HIGHEST_PROTOCOL)
+
+def load_obj(path):
+    with open(path, 'rb') as f:
+        return pickle.load(f)
+
+def write_in_txt(file, result, id_list):
+    with open(file,'w') as f:
+        for i, j in zip(result,id_list):
+            f.write("{}:{}\n ".format(j,i))
+
+
 
 # file_path = 'D:\\ttds-cw3\Articles.xml'
-file_path = './Articles.xml'
+from recommender import Convert_news_to_vectors, find_most_similar_doc
+
+file_path = 'D:\\ttds-cw3\\dataset_classifier\\health_390.xml'
+
 
 
 def package_install():
@@ -38,54 +59,71 @@ def get_classifier():
     '''
     corpuses = []
     label_LIST = []
-    for i, j in zip(["Business", "Entertainment", "Health", "Politics", "Sci_Technology", "Sport", "World"],
+    for i, j in zip(["business_200", "entertainment_200", "health_200", "politics_200", "sci-tech_200", "sport_200", "world_200"],
                     [1, 2, 3, 4, 5, 6, 7]):
-        file_path = 'D:\\ttds-cw3\\catagery-bbc\\AAA\\Articles.xml'
+        file_path = 'D:\\ttds-cw3\\dataset_classifier\\AAA.xml'
         file_path = re.sub("AAA", i, file_path)
-        complete_id_attris_dict, id_text_dict, id_time_dict = xml_parser(file_path=file_path,
-                                                                         attri_list=['TITLE', 'AUTHER', 'DATE', 'TOPIC',
-                                                                                     'IMAGE', 'TEXT', 'URL'])
+        complete_id_attris_dict, id_text_dict, id_time_dict = xml_parser1(file_path=file_path,
+                                                                         attri_list=['TITLE',
+                                                                                      'TEXT'])
         corpuse, lable = get_data(id_text_dict, j)
         corpuses += corpuse
         label_LIST += lable
 
     classifier, features = build_classifier(corpuses, label_LIST)
 
+
     return classifier, features
+
 
 
 def main():
     # step 1: parse xml
     # complete_id_attris_dict = {ID:{attri:val}}, id_text_dict = {ID: [title + text]}
-    complete_id_attris_dict, id_text_dict, id_time_dict = xml_parser(file_path=file_path,
-                                                                     attri_list=['TITLE', 'AUTHER', 'DATE', 'TOPIC',
-                                                                                 'IMAGE', 'TEXT', 'URL'])
 
-    # todo: shorten ID!
-    # todo: step2: store complete_id_attris_dict into database and release memory
+    complete_id_attris_dict, id_text_dict, id_time_dict, id_flag = read_dataset('F:\\Mytools\\workspace\\ttds-cw3\\dataset')
 
-    # step 3: indexing
+    print("step 1 done")
+
+
+    # step 2: indexing
     # indexed_dict = {term: {id:[pos]}}
+    id_text_dict = np.load('D:\\ttds-cw3\\id_text.npy', allow_pickle=True).item()
+    print('id_text load done')
     indexed_dict = indexing(id_text_dict)
-
-    # step 4: form TFIDF, bm25 ranking results for each term in corresponding documents
+    np.save('D:\\ttds-cw3\\indexed.npy', indexed_dict)
+    indexed_dict = np.load('D:\\ttds-cw3\\indexed.npy', allow_pickle=True).item()
+    print('step2 done')
+    # step 3: form TFIDF, bm25 ranking results for each term in corresponding documents
     # term_id_tfidf_bm25_dict = {term: {id: (tfidf, bm25) }}
+
+
     term_id_tfidf_bm25_dict = form_term_id_tfidf_bm25(id_text_dict, indexed_dict)
+    save_obj(term_id_tfidf_bm25_dict)
+    np.save('D:\\ttds-cw3\\iterm_id.npy', term_id_tfidf_bm25_dict)
+    print('step3 done')
+    # step 4: Construct a Classifier and Classify the News. Write to complete_id_attris_dict before storing
 
-    # step 5: Construct a Classifier and Classify the News. Write to complete_id_attris_dict before storing
+    #classifier, features = get_classifier()
+    #print("got classifier")
+    #term_id_tfidf_bm25_dict = load_obj('D:\\ttds-cw3\\term_i.pkl')
+    #print('term_i load done')
+    #Vectors, id_list = vectorize(id_text_dict, features, term_id_tfidf_bm25_dict)
+    #y_pred = classifier.predict(Vectors)
+    #write_in_txt("D:\\ttds-cw3\\categoty.txt",y_pred,id_list)
+    #print("prediction done")
 
-    classifier, features = get_classifier()
-    Vectors = vectorize(id_text_dict, features, term_id_tfidf_bm25_dict)
-    y_pred = classifier.predict(Vectors)
-    for i, value in enumerate(complete_id_attris_dict.values()):
-        value['Category'] = y_pred[i]
+    #for i, value in enumerate(complete_id_attris_dict.values()):
+        #value['Category'] = y_pred[i]
 
-    # step 6: recommend 5 top related news based on tfidf or bm25 score
-    vectors, id_list = convert_news_to_vectors(id_text_dict, term_id_tfidf_bm25_dict,
-                                               mode='bm25', top_n_terms=25)
-    similar_doc = find_most_similar_doc(vectors, id_list)
+    # step 5: recommend 5 top related news based on tfidf or bm25 score
+    #length = len(Vectors)
+    #pie = int(length / 10000)
+    #Similar_doc = recommend(pie, Vectors, id_list)
+    #np.save("D:\\ttds-cw3\\pieLast.npy", Similar_doc)
+    #print("save pieLast done")
 
-    # step 7: search model
+    # step 6: search model
     # todo: interface of getting search query here
     search_query = 'National Committee'
 
@@ -93,7 +131,7 @@ def main():
     search_instance.get_search_query(search_query)
 
     # glove_model = load_glove()
-    # search_instance.get_glove_model(glove_model)
+    search_instance.get_glove_model(glove_model)
 
     result, len = search_instance.conduct_search()
     print('search result: ' + str(result) + '    number of news found: ' + str(len))
@@ -103,7 +141,7 @@ def main():
 
 def test():
     res = find_synonyms_search_comb({'museums', 'library'})
-    print(res)
+    #print(res)
     # glove_model = load_glove()
     # res = find_similar_search_comb({'chinese', 'food'}, glove_model)
     # print(res)
