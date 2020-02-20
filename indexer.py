@@ -58,9 +58,9 @@ def xml_parser1(file_path, attri_list):
 
     return complete_id_attris_dict, id_text_dict, id_time_dict
 
-def baseN(num, b):
-  return ((num == 0) and "0") or \
-      (baseN(num // b, b).lstrip("0") + "0123456789abcdefghijklmnopqrstuvwxyz"[num % b])
+# def baseN(num, b):
+#   return ((num == 0) and "0") or \
+#       (baseN(num // b, b).lstrip("0") + "0123456789abcdefghijklmnopqrstuvwxyz"[num % b])
 
 def xml_parser(file_path, attri_list,id_start):
     """
@@ -84,7 +84,7 @@ def xml_parser(file_path, attri_list,id_start):
     id_time_dict = dict()
     for doc in root.findall('DOC'):
         try:
-            id = str(baseN(id_flag, 32))
+            id = str(id_flag)
 
             title = ''
             main_text = ''
