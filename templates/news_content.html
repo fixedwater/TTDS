@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <!--link href="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/css/bootstrap.min.css" rel="stylesheet" -->
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <!--script src="https://code.jquery.com/jquery-3.4.1.min.js"></script-->
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:300,600' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Lora:400,700' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/scrolling-nav.css') }}">
+    <!--link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/bootstrap.min.css') }}"-->
+
+    <!-- %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% -->
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans:400,700%7CLato:300,400" rel="stylesheet">
+
+
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/bootstrap2.min.css') }}">
+
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/owl.carousel.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/owl.theme.default.css') }}">
+
+
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/font-awesome.min.css') }}">
+	<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/style2.css') }}">
+
+    <script type="text/javascript" src="{{ url_for('static', filename='js/jquery.min.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='js/owl.carousel.min.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='js/main.js') }}"></script>
+
+    <title>News content</title>
+</head>
+<body id="page-top">
+
+	<nav class="navbar navbar-default">
+  <div class="container-fluid">
+    <!-- Brand and toggle get grouped for better mobile display -->
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="#">TTDS</a>
+    </div>
+
+    <!-- Collect the nav links, forms, and other content for toggling -->
+    <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+      <ul class="nav navbar-nav">
+        <li class="active"><a href="#">News Detail <span class="sr-only">(current)</span></a></li>
+          </ul>
+        </li>
+      </ul>
+      <form action="/search/" method="get" class="navbar-form navbar-left">
+
+        <div class="form-group">
+          <input placeholder="Search for..." name="query" autocomplete="on" required="required"  class="form-control" >
+        </div>
+        	<button type="submit" class="btn btn-default">Search</button>
+
+      </form>
+      <ul class="nav navbar-nav navbar-right">
+        <li><a href="/">Back to Home</a></li>
+          </ul>
+        </li>
+      </ul>
+    </div><!-- /.navbar-collapse -->
+  </div><!-- /.container-fluid -->
+</nav>
+
+
+
+	<!-- SECTION -->
+		<div class="section">
+			<!-- CONTAINER -->
+			<div class="container">
+				<!-- ROW -->
+				<div class="row">
+					<!-- Main Column -->
+					<div class="col-md-8">
+
+						<!-- breadcrumb -->
+						<ul class="article-breadcrumb">
+
+							<li>{{article[1]}}</li>
+						</ul>
+						<!-- /breadcrumb -->
+
+						<!-- ARTICLE POST -->
+						<article class="article article-post">
+
+							<div class="article-main-img">
+								<img src="{{article[4]}}" alt="">
+							</div>
+							<div class="article-body">
+
+								<h1 class="article-title">{{article[1]}}</h1>
+								<ul class="article-meta">
+									<li><i class="fa "></i> {{article[3]}}</li>
+									<li><i class="fa "></i>{{article[2]}}</li>
+								</ul>
+								<p>{{article[6]}}</p>
+							</div>
+
+						</article>
+						<!-- /ARTICLE POST -->
+
+
+
+
+
+					</div>
+					<!-- /Main Column -->
+
+					<!-- Aside Column -->
+					<div class="col-md-4">
+
+
+
+
+						<!-- article widget -->
+						<div class="widget">
+							<div class="widget-title">
+								<h2 class="title">Recommended news</h2>
+							</div>
+
+
+ 					{%for news in article2%}
+							<!-- ARTICLE -->
+							<article class="article widget-article">
+								<div class="article-img">
+									<a href="#">
+										<img src="{{news[4]}}" alt="">
+									</a>
+								</div>
+								<div class="article-body">
+									<h4 class="article-title"><a href="/search/article/{{news[0]}}">{{news[1]}}</a></h4>
+									<ul class="article-meta">
+										<li><i class="fa "></i>{{news[2]}}</li>
+
+									</ul>
+								</div>
+							</article>
+							 {% endfor %}
+							<!-- /ARTICLE -->
+
+
+						</div>
+						<!-- /article widget -->
+
+
+							</div>
+							<!-- /owl carousel 4 -->
+						</div>
+						<!-- /article widget -->
+					</div>
+					<!-- /Aside Column -->
+				</div>
+				<!-- /ROW -->
+
+
+
+		<!-- Back to top -->
+		<div id="back-to-top"></div>
+		<!-- Back to top -->
+
+
+</body>
+
+
+
+
+  <!-- Footer -->
+  <footer class="py-5 bg-dark">
+    <div class="container">
+      <p class="m-0 text-center text-white">TTDS &copy; Coursework</p>
+    </div>
+    <!-- /.container -->
+  </footer>
+
+
+</body>
+</html>

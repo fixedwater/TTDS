@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="News search engine">
+    <title>News Search Engine</title>
+
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/css/bootstrap.min.css" rel="stylesheet" >
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:300,600' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Lora:400,700' rel='stylesheet' type='text/css'>
+
+    <!-- jQuery (Bootstrap 的所有 JavaScript 插件都依赖 jQuery，所以必须放在前边) -->
+    <script src="https://cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+    <!-- 加载 Bootstrap 的所有 JavaScript 插件。你也可以根据需要只加载单个插件。 -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/js/bootstrap.min.js"></script>
+
+
+    <!--[if lt IE 9]>
+      <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="//cdnjs.cloudflare.com/ajax/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+    <!-- Site -->
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/prism.css') }}">
+    <script type="text/javascript" src="{{ url_for('static', filename='js/prism.js') }}"></script>
+
+
+</head>
+<body>
+
+<section class="main">
+
+<!-- banner -->
+    <div class="container landing-page">
+
+
+<!-- main text-->
+        <div class="row">
+            <div class="col-md-12">
+                <form action="/search/" method="get">
+                    <div class="form-group row" style="margin-top: 20px; margin-bottom: 40px">
+                        <div class="input-group col-md-10 col-md-offset-1">
+                            <input class="form-control" placeholder="Search for..." name="query" autofocus="autofocus" autocomplete="on" required="required">
+                            <span class="input-group-btn">
+                                <button class="btn btn-default" type="button" onclick="document.forms[0].submit();return false;">Search</button>
+                            </span>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <hgroup class="mb20"></hgroup>
+        <hgroup class="mb20" style="border: none;">
+          <div align="center">
+            <h1>Search Results</h1>
+            <h2 class="lead"><strong>{{ lens }}</strong> results were found for the
+                search of <strong>{{ query }}</strong></h2>
+          </div>
+        </hgroup>
+
+        <div class=flash></div>
+
+        <section class="col-xs-12 col-md-12">
+
+
+            {% for post in article%}
+                <article class="search-result row">
+
+                    <div class="col-xs-12 col-sm-3">
+                        <a href="/search/article/{{post[0]}}" title="{{ post[1] }}" class="thumbnail">
+                            <img
+                                src="{{ post[4] }}"
+                                alt="News picture"/>
+                        </a>
+                    </div>
+
+
+                    <div class="col-xs-12 col-sm-9 excerpet">
+                        <h3 class="article-title" >
+                            <a href="/search/article/{{post[0]}}" title="{{ post[1] }}" > {{ post[1]}}</a>
+                        </h3>
+
+                        <p class="article-date">{{ post[3] }} - {{post[2]}}</p>
+                        <p>{{ post[6] }}...</p>
+                        <p><a href="/search/article/{{post[0]}}">Read more </a></p>
+                    </div>
+                </article>
+
+            {% endfor %}
+        </section>
+        <center>
+
+                <div class="btn-group">
+                  <button class="btn btn-default btn-lg dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    Choose Page <span class="caret"></span>
+                  </button>
+                  <ul class="dropdown-menu" style="height:200px;overflow:scroll">
+                   <li>
+                       {% for i in pages %}
+                        <a href="/search/page/{{i}}/">Page {{i}}</a>&nbsp;
+                       {% endfor %}</li>
+                  </ul>
+                </div>
+
+        </center>
+    </div>
+
+
+</section>
+
+<footer class="py-5 bg-dark">
+    <div class="container">
+      <p href="https://www.inf.ed.ac.uk/teaching/courses/tts/" class="m-0 text-center text-white">TTDS &copy; Coursework</p>
+    </div>
+    <!-- /.container -->
+</footer>

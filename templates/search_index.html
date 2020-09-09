@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="News search engine">
+    <title>News Search Engine</title>
+
+	<link href="https://fonts.googleapis.com/css?family=Open+Sans:400,700%7CLato:300,400" rel="stylesheet">
+
+
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/bootstrap2.min.css') }}">
+
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/owl.carousel.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/owl.theme.default.css') }}">
+
+
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/font-awesome.min.css') }}">
+	<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/style2.css') }}">
+
+    <script type="text/javascript" src="{{ url_for('static', filename='js/jquery.min.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='js/owl.carousel.min.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='js/main.js') }}"></script>
+
+
+</head>
+
+<body onload="run()">
+
+<section class="main">
+<!-- banner -->
+    <div class="container landing-page" style="text-align: center">
+        <div class="row" style="padding-top: 48px">
+            <div class="col-md-10 col-md-offset-1">
+                <img src="./static/img/banner.png" style="max-width: 85%;">
+            </div>
+        </div>
+<!-- main text-->
+        <div class="row">
+            <div class="col-md-10 col-md-offset-1">
+                <form action="/search/" method="get">
+                    <div style="margin-top: 22px;">
+                        <div class="col-md-12">
+                            <input class="form-control" placeholder="Search for" name="query" autofocus="autofocus" autocomplete="on" required="required">
+                        </div>
+
+                        <div class="col-md-12">
+                            <br>
+                            <button class="btn btn-default">Search news</button>
+                            <button class="btn btn-default" style="margin-left: 20px;">Having a look</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- SECTION -->
+		<div class="section">
+			<!-- CONTAINER -->
+			<div class="container">
+				<!-- ROW -->
+				<div class="row">
+					<!-- Main Column -->
+					<div class="col-md-12">
+						<!-- section title -->
+						<div class="section-title">
+							<h2 class="title">news classification</h2>
+							<!-- tab nav -->
+							<ul class="tab-nav pull-right">
+								<li ><a data-toggle="tab" href="#tab1"><span id="auto_click">Business</span></a></li>
+								<li class="active"><a data-toggle="tab" href="#tab2">Entertainment</a></li>
+								<li><a data-toggle="tab" href="#tab3">Health</a></li>
+								<li><a data-toggle="tab" href="#tab4">Politics</a></li>
+								<li><a data-toggle="tab" href="#tab5">Sci_Tech</a></li>
+								<li><a data-toggle="tab" href="#tab6">Sport</a></li>
+								<li><a data-toggle="tab" href="#tab7">World</a></li>
+							</ul>
+							<!-- /tab nav -->
+						</div>
+						<!-- /section title -->
+
+						<!-- Tab content -->
+						<div class="tab-content">
+							<!-- tab1 -->
+							<div id="tab1" class="tab-pane fade in active">
+								<!-- row -->
+								<div class="row">
+									{% for post in sulin1[0:4]%}
+									<!-- Column 1 -->
+									<div class="col-md-3 col-sm-6">
+										<!-- ARTICLE -->
+										<article class="article">
+											<div class="article-img">
+												<a href="/search/article/{{post[0]}}">
+													<img src="{{post[4]}}" alt="">
+												</a>
+
+											</div>
+											<div class="article-body">
+												<h4 class="article-title"><a href="#">{{post[1]}}</a></h4>
+												<ul class="article-meta">
+													<li><i class="fa "></i> {{post[3]}}</li>
+													<li><i class="fa "></i> {{post[2]}}</li>
+												</ul>
+											</div>
+										</article>
+										<!-- /ARTICLE -->
+									</div>
+									<!-- /Column 1 -->
+									{% endfor %}
+								</div>
+								<!-- /row -->
+					</div>
+							<!-- tab2 -->
+							<div id="tab2" class="tab-pane fade in active">
+								<!-- row -->
+								<div class="row">
+									{% for post in sulin2[0:4]%}
+									<!-- Column 1 -->
+									<div class="col-md-3 col-sm-6">
+										<!-- ARTICLE -->
+										<article class="article">
+											<div class="article-img">
+												<a href="#">
+													<img src="{{post[4]}}" alt="">
+												</a>
+
+											</div>
+											<div class="article-body">
+												<h4 class="article-title"><a href="/search/article/{{post[0]}}">{{post[1]}}</a></h4>
+												<ul class="article-meta">
+													<li><i class="fa "></i> {{post[3]}}</li>
+													<li><i class="fa "></i> {{post[2]}}</li>
+												</ul>
+											</div>
+										</article>
+										<!-- /ARTICLE -->
+									</div>
+									<!-- /Column 1 -->
+									{% endfor %}
+								</div>
+								<!-- /row -->
+					</div>
+							<!-- tab3 -->
+							<div id="tab3" class="tab-pane fade in active">
+								<!-- row -->
+								<div class="row">
+									{% for post in sulin3[0:4]%}
+									<!-- Column 1 -->
+									<div class="col-md-3 col-sm-6">
+										<!-- ARTICLE -->
+										<article class="article">
+											<div class="article-img">
+												<a href="#">
+													<img src="{{post[4]}}" alt="">
+												</a>
+
+											</div>
+											<div class="article-body">
+												<h4 class="article-title"><a href="/search/article/{{post[0]}}">{{post[1]}}</a></h4>
+												<ul class="article-meta">
+													<li><i class="fa "></i> {{post[3]}}</li>
+													<li><i class="fa "></i> {{post[2]}}</li>
+												</ul>
+											</div>
+										</article>
+										<!-- /ARTICLE -->
+									</div>
+									<!-- /Column 1 -->
+									{% endfor %}
+								</div>
+								<!-- /row -->
+					</div>
+							<!-- tab4 -->
+							<div id="tab4" class="tab-pane fade in active">
+								<!-- row -->
+								<div class="row">
+									{% for post in sulin4[0:4]%}
+									<!-- Column 1 -->
+									<div class="col-md-3 col-sm-6">
+										<!-- ARTICLE -->
+										<article class="article">
+											<div class="article-img">
+												<a href="#">
+													<img src="{{post[4]}}" alt="">
+												</a>
+
+											</div>
+											<div class="article-body">
+												<h4 class="article-title"><a href="/search/article/{{post[0]}}">{{post[1]}}</a></h4>
+												<ul class="article-meta">
+													<li><i class="fa "></i> {{post[3]}}</li>
+													<li><i class="fa "></i> {{post[2]}}</li>
+												</ul>
+											</div>
+										</article>
+										<!-- /ARTICLE -->
+									</div>
+									<!-- /Column 1 -->
+									{% endfor %}
+								</div>
+								<!-- /row -->
+					</div>
+							<!-- tab5 -->
+							<div id="tab5" class="tab-pane fade in active">
+								<!-- row -->
+								<div class="row">
+									{% for post in sulin5[0:4]%}
+									<!-- Column 1 -->
+									<div class="col-md-3 col-sm-6">
+										<!-- ARTICLE -->
+										<article class="article">
+											<div class="article-img">
+												<a href="#">
+													<img src="{{post[4]}}" alt="">
+												</a>
+
+											</div>
+											<div class="article-body">
+												<h4 class="article-title"><a href="/search/article/{{post[0]}}">{{post[1]}}</a></h4>
+												<ul class="article-meta">
+													<li><i class="fa "></i> {{post[3]}}</li>
+													<li><i class="fa "></i> {{post[2]}}</li>
+												</ul>
+											</div>
+										</article>
+										<!-- /ARTICLE -->
+									</div>
+									<!-- /Column 1 -->
+									{% endfor %}
+								</div>
+								<!-- /row -->
+					</div>
+							<!-- tab6 -->
+							<div id="tab6" class="tab-pane fade in active">
+								<!-- row -->
+								<div class="row">
+									{% for post in sulin6[6:10]%}
+									<!-- Column 1 -->
+									<div class="col-md-3 col-sm-6">
+										<!-- ARTICLE -->
+										<article class="article">
+											<div class="article-img">
+												<a href="#">
+													<img src="{{post[4]}}" alt="">
+												</a>
+
+											</div>
+											<div class="article-body">
+												<h4 class="article-title"><a href="/search/article/{{post[0]}}">{{post[1]}}</a></h4>
+												<ul class="article-meta">
+													<li><i class="fa "></i> {{post[3]}}</li>
+													<li><i class="fa "></i> {{post[2]}}</li>
+												</ul>
+											</div>
+										</article>
+										<!-- /ARTICLE -->
+									</div>
+									<!-- /Column 1 -->
+									{% endfor %}
+								</div>
+								<!-- /row -->
+					</div>
+							<!-- tab7 -->
+							<div id="tab7" class="tab-pane fade in active">
+								<!-- row -->
+								<div class="row">
+									{% for post in sulin7[0:4]%}
+									<!-- Column 1 -->
+									<div class="col-md-3 col-sm-6">
+										<!-- ARTICLE -->
+										<article class="article">
+											<div class="article-img">
+												<a href="#">
+													<img src="{{post[4]}}" alt="">
+												</a>
+											</div>
+											<div class="article-body">
+												<h4 class="article-title"><a href="/search/article/{{post[0]}}">{{post[1]}}</a></h4>
+												<ul class="article-meta">
+													<li><i class="fa "></i> {{post[3]}}</li>
+													<li><i class="fa "></i> {{post[2]}}</li>
+												</ul>
+											</div>
+										</article>
+										<!-- /ARTICLE -->
+									</div>
+									<!-- /Column 1 -->
+									{% endfor %}
+								</div>
+								<!-- /row -->
+					</div>
+					<!-- /Main Column -->
+						</div>
+					</div>
+				</div>
+			</div>
+
+				<!-- /ROW -->
+			</div>
+
+			<!-- /CONTAINER -->
+
+<!-- /SECTION -->
+
+
+
+
+
+	<footer class="py-5 bg-dark">
+		<div class="container">
+		  <p href="https://www.inf.ed.ac.uk/teaching/courses/tts/" class="m-0 text-center text-white">TTDS &copy; Coursework</p>
+			<p  class="m-0 text-center text-white">Changchun Li · Zheng Huang · Chenyu Huang · Ziheng Chen · Zhezong Li · Ninghuan Jiang</p>
+
+		</div>
+		<!-- /.container -->
+	</footer>
+
+
+</body>
+
+<script>
+function run(){
+	document.getElementById("auto_click").click();}
+</script>
+
+</html>
